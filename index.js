@@ -3,7 +3,25 @@ class Account {
   constructor(username) {
     this.username = username;
     // Starting balance is $0
-    this.balance = 0;
+    
+    this.transactions = [];
+  }
+
+  get balance() {
+    let totalBalance = 0;
+
+    this.transactions.forEach( (transaction) => {
+      totalBalance += transaction.value;
+    })
+    return totalBalance;
+  }
+  
+  get transactionCount() {
+    return this.transactions.length;
+  }
+
+  addTransaction(transaction) {
+    this.transactions.push(transaction);
   }
 
 }
@@ -11,43 +29,64 @@ class Account {
 class Transaction {
 
   constructor(amount, account) {
-    this.amount = amount;
+    this._amount = amount;
     this.account = account;
+  }
+
+  isAllowed() {
+    if (this.value < 0 && this.value + this.account.balance < 0) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  commit() {
+    console.log(this.value);
+    if (this.isAllowed()) {
+      this.time = new Date();
+      this.account.addTransaction(this);
+      return true;
+
+    } else {
+      console.log("Can't take funds")
+      return false;
+    }
   }
 }
 
 
 class Withdrawal extends Transaction {
 
-   commit() {
-    this.account.balance -= this.amount;
+  get value() {
+    return -this._amount;
   }
 }
 
 class Deposit extends Transaction {
 
-  commit() {
-    this.account.balance += this.amount;
+  get value() {
+    return this._amount;
   }
 }
+  
 
 // DRIVER CODE BELOW
 // We use the code below to "drive" the application logic above and make sure it's working as expected
 
-const account1 = new Account("snow-patrol");
+const account1 = new Account("jack");
 
-
+// Transaction 1
 t1 = new Deposit(200.50, account1);
 t1.commit();
-console.log('Transaction 1:', t1);
+console.log('Current Balance: ', account1.balance); // Starting balance
 
-t2 = new Withdrawal(10, account1);
+t2 = new Withdrawal(300, account1);
 t2.commit();
-console.log('Transaction 2:', t2);
 
-// t3 = new Deposit(120.00);
+// t3 = new Deposit(120.00, account1);
 // t3.commit();
-// console.log('Transaction 3:', t3);
 
-console.log(account1.balance);
+console.log(account1.transactionCount);
+console.log('Remaining Balance: ', account1.balance);
 
