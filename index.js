@@ -33,25 +33,22 @@ class Transaction {
     this.account = account;
   }
 
-  isAllowed() {
-    if (this.value < 0 && this.value + this.account.balance < 0) {
-      return false;
-    } else {
-      return true;
-    }
-  }
+  // isAllowed() {
+  //   if (this.value < 0 && this.value + this.account.balance < 0) {
+  //     return false;
+  //   } else {
+  //     return true;
+  //   }
+  // }
 
   commit() {
-    console.log(this.value);
-    if (this.isAllowed()) {
-      this.time = new Date();
-      this.account.addTransaction(this);
-      return true;
-
-    } else {
-      console.log("Can't take funds")
+    if (!this.isAllowed()) {
+      console.log("Not enough funds"); 
       return false;
-    }
+    }  
+    this.time = new Date();
+    this.account.addTransaction(this);
+    return true;
   }
 }
 
@@ -61,12 +58,22 @@ class Withdrawal extends Transaction {
   get value() {
     return -this._amount;
   }
+
+  isAllowed() {
+    // note the relation to parent when accessing account balance
+    return (this.account.balance - this.amount >= 0);
+  }
 }
 
 class Deposit extends Transaction {
 
   get value() {
     return this._amount;
+  }
+
+  isAllowed() {
+    // always allowed to receive money
+    return true;
   }
 }
   
